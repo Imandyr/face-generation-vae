@@ -86,48 +86,10 @@ class BaseDataGen:
                     images_batch = fixed_image_standardization(images_batch)
 
                     # yield images batch
-                    yield {'encoder_input': images_batch}, {"output_1": images_batch}
+                    yield {'encoder_input': images_batch}, {"loss_layer": images_batch}
                     # reset images_batch variable
                     images_batch = []
 
-#
-# """test of generator"""
-#
-# # params
-# path_to_images = r"F:\large_data\Flickr_Faces_HQ_dataset\splitted_images\test"
-# batch_size = 20
-# image_array_shape = (256, 256, 3)
-# augmentation = False
-#
-# # images augmentation generator
-# augmentation_datagen = ImageDataGenerator(
-#     rotation_range=0,
-#     width_shift_range=0.05,
-#     height_shift_range=0.05,
-#     zoom_range=0.05,
-#     horizontal_flip=True,
-#     fill_mode="nearest", )
-#
-# # initialize generator
-# test_gen = BaseDataGen(path_to_images, batch_size, image_array_shape, augmentation, augmentation_datagen)
-#
-# # use and test generator
-# for c1, test_images in enumerate(test_gen.data_generation()):
-#
-#     for c2, test_image in enumerate(test_images[0]["encoder_input"]):
-#         test_image = de_standardization(test_image)
-#         #print(test_image)
-#         #print(test_image.shape)
-#         cv2.imshow("processed images", test_image)
-#         if cv2.waitKey(5) & 0xFF == ord("q"):
-#             cv2.destroyAllWindows()
-#             break
-#         #time.sleep(0.1)
-#         # plt.imshow(test_image)
-#         # plt.show()
-#
-#     if c1 % 100 == 0:
-#         logger.info(f"total iterated images number: {c1*batch_size}")
 
 
 

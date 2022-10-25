@@ -1,4 +1,4 @@
-# train of VAE model for face generation
+# train of correct loss calculating VAE model for face generation
 
 
 """imports"""
@@ -31,35 +31,35 @@ from keras import backend as K
 
 from common_functions import *
 from data_generator import *
-from model import *
+from vae_model import *
 
 
 """params of model"""
 
 path_to_images = r"F:\large_data\Flickr_Faces_HQ_dataset\splitted_images"
-batch_size = 15
+batch_size = 32
 image_array_shape = (128, 128, 3)
 augmentation = False
 
-output_encoder_dim = 20
-reconstruction_loss_factor = 1000
+output_encoder_dim = 10
+reconstruction_loss_factor = 1.0
 
 learning_rate = 0.000001
-steps_per_epoch = 200
-validation_steps = 40
+steps_per_epoch = 1280
+validation_steps = 160
 epochs = 1000
 
 # path to directory for callback outputs
-path_to_callback_generated_images = r"generated_images/callbacks_train_images_1/selu_5_3_5_20_16384_2048_1"
+path_to_callback_generated_images = r"generated_images/callbacks_train_images_3"
 
 test_images_patience = 1
-model_checkpoint_filepath = "models_checkpoints/VAE_v1.h5"
+model_checkpoint_filepath = "models_checkpoints/VAE_v1.2.h5"
 model_checkpoint_monitor = "val_loss"
 early_stopping_monitor = "val_loss"
-early_stopping_patience = 100
+early_stopping_patience = 20
 RLROP_monitor = "val_loss"
 RLROP_factor = 0.1
-RLROP_patience = 20  # 10
+RLROP_patience = 5
 RLROP_min_lr = 0.000000001
 tensorboard_logdir = "tensorboard_logdir/VAE_v1"
 
@@ -84,31 +84,27 @@ test_gen = BaseDataGen(path_to_images+r"\test", batch_size, image_array_shape, a
 """create and compile model"""
 
 # create model
-vae_model = VAE(sampling_function=sampling, img_shape=image_array_shape, output_encoder_dim=output_encoder_dim)
+encoder, decoder, vae_model = VAE(sampling_function=sampling, img_shape=image_array_shape,
+                                  output_encoder_dim=output_encoder_dim,
+                                  reconstruction_loss_factor=reconstruction_loss_factor,).model()
 # build model
 vae_model.build(input_shape=[None, image_array_shape[0], image_array_shape[1], image_array_shape[2]])
 # summary of vae
 vae_model.summary()
 # summary of encoder
-vae_model.get_layer("encoder_model").summary()
+encoder.summary()
 # summary of decoder
-vae_model.get_layer("decoder_model").summary()
-
-# initialize loss functions for vae
-vae_loss_func_v1 = loss_func_v1(vae_model.get_layer("encoder_model").get_layer("encoder_mu"),
-                          vae_model.get_layer("encoder_model").get_layer("encoder_log_variance"),
-                          reconstruction_loss_factor=reconstruction_loss_factor)
-vae_loss_func_v2 = loss_func_v2(vae_model.get_layer("encoder_model").get_layer("encoder_mu"),
-                          vae_model.get_layer("encoder_model").get_layer("encoder_log_variance"))
+decoder.summary()
 
 # compile model
-vae_model.compile(optimizer=optimizers.Adam(learning_rate=learning_rate), loss=vae_loss_func_v1,
-            metrics=["accuracy"])
+vae_model.compile(optimizer=optimizers.Adam(learning_rate=learning_rate), loss=vae_loss,
+            metrics=[])
+vae_model.load_weights("models_checkpoints/VAE_v1.1.h5")
 
 
 """train model"""
 
-# create test images array
+# test images array
 test_images_array = next(test_gen.data_generation())[0]["encoder_input"]
 
 # callbacks
