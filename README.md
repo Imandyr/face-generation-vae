@@ -17,6 +17,4 @@ model_train.py - train of model
 model_test.py - test of model generation
 
 
-# weights
 
-if someonese need: [pre-trained weights](https://drive.google.com/drive/folders/1YL1FH5aWEJvObuG9NjkfyOAp9Rl9NpNb?usp=sharing)
